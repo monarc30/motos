@@ -1,5 +1,6 @@
 # Se o document root for exatamente a pasta motos (URL sem /motos),
 # use: RewriteBase / e altere base_url em config/app.php para ''.
+Options -Indexes +FollowSymLinks
 RewriteEngine On
 RewriteBase /motos
 

@@ -14,14 +14,18 @@ class EnvService
             return;
         }
 
-        // Carrega .env manualmente para garantir que funcione
+        // Carrega .env manualmente (raiz do projeto ou .env_prod em produção)
         $basePath = dirname(__DIR__, 2);
         $envFile = $basePath . '/.env';
-        
         if (!file_exists($envFile)) {
-            $envFile = '/var/www/motos/.env';
+            $envFile = $basePath . '/.env_prod';
         }
-        
+        if (!file_exists($envFile) && getcwd() !== false) {
+            $envFile = rtrim(getcwd(), DIRECTORY_SEPARATOR) . '/.env';
+        }
+        if (!file_exists($envFile) && getcwd() !== false) {
+            $envFile = rtrim(getcwd(), DIRECTORY_SEPARATOR) . '/.env_prod';
+        }
         if (file_exists($envFile)) {
             $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             foreach ($lines as $line) {
