@@ -23,11 +23,13 @@ $logLastError = static function () use ($logFile) {
 
 register_shutdown_function($logLastError);
 
-set_error_handler(static function (int $severity, string $message, string $file, int $line) {
-    if ((E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR) & $severity) {
+set_error_handler(static function (int $severity, string $message, string $file, int $line) use ($logFile) {
+    $fatal = (E_ERROR | E_PARSE | E_CORE_ERROR | E_COMPILE_ERROR) & $severity;
+    if ($fatal) {
         return false;
     }
-    throw new \ErrorException($message, 0, $severity, $file, $line);
+    @file_put_contents($logFile, date('Y-m-d H:i:s') . " [{$severity}] {$message} in {$file}:{$line}\n", FILE_APPEND | LOCK_EX);
+    return true;
 }, E_ALL);
 
 set_exception_handler(static function (\Throwable $e) use ($logError, $logFile) {
