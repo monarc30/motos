@@ -1,0 +1,14 @@
+/vendor/
+/node_modules/
+/storage/logs/*
+/storage/cache/*
+/storage/documentos/*
+!.gitkeep
+.env
+.env_prod
+.env.*
+!.env.example
+composer.lock
+.idea/
+.vscode/
+

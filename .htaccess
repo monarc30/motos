@@ -1,0 +1,25 @@
+# Se o document root for exatamente a pasta motos (URL sem /motos),
+# use: RewriteBase / e altere base_url em config/app.php para ''.
+RewriteEngine On
+RewriteBase /motos
+
+# Redirecionar antigos links /motos/public/ para /motos/
+RewriteRule ^public/(.*)$ $1 [R=301,L]
+
+# Bloquear acesso direto a pastas e arquivos sensíveis
+RewriteRule ^app/ - [F,L]
+RewriteRule ^config/ - [F,L]
+RewriteRule ^database/ - [F,L]
+RewriteRule ^vendor/ - [F,L]
+RewriteRule ^storage/ - [F,L]
+RewriteRule ^\.env - [F,L]
+RewriteRule ^\.env_prod - [F,L]
+RewriteRule ^\.git - [F,L]
+
+# Arquivos e pastas existentes (assets, etc.) são servidos normalmente
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Encaminhar o resto para index.php
+RewriteRule ^(.*)$ index.php [QSA,L]
