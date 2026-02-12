@@ -63,9 +63,6 @@ try {
 
     \App\Services\EnvService::load();
 
-    use App\Controllers\IntencaoVendaController;
-    use App\Controllers\ComunicadoVendaController;
-
     session_start();
 
     $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
@@ -89,10 +86,10 @@ try {
             $controller = new \App\Controllers\HomeController();
             break;
         case 'intencao-venda':
-            $controller = new IntencaoVendaController();
+            $controller = new \App\Controllers\IntencaoVendaController();
             break;
         case 'comunicado-venda':
-            $controller = new ComunicadoVendaController();
+            $controller = new \App\Controllers\ComunicadoVendaController();
             break;
         default:
             $controller = new \App\Controllers\HomeController();
