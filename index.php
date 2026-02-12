@@ -13,11 +13,25 @@ $logError = static function (\Throwable $e) use ($logFile) {
     @file_put_contents($logFile, $line, FILE_APPEND | LOCK_EX);
 };
 
-$logLastError = static function () use ($logFile) {
+$renderErrorPage = static function (string $title, string $message, string $file, int $line, array $trace, string $projectRoot) {
+    $errorTitle = $title;
+    $errorMessage = $message;
+    $errorFile = $file;
+    $errorLine = $line;
+    $errorTrace = $trace;
+    require $projectRoot . '/app/Views/errors/debug.php';
+};
+
+$logLastError = static function () use ($logFile, $projectRoot, $renderErrorPage) {
     $err = error_get_last();
     if ($err && in_array($err['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
         $line = date('Y-m-d H:i:s') . ' FATAL ' . $err['message'] . ' in ' . $err['file'] . ':' . $err['line'] . "\n";
         @file_put_contents($logFile, $line, FILE_APPEND | LOCK_EX);
+        if (!headers_sent()) {
+            header('Content-Type: text/html; charset=utf-8');
+            http_response_code(500);
+            $renderErrorPage('Erro fatal', $err['message'], $err['file'], $err['line'], [], $projectRoot);
+        }
     }
 };
 
@@ -32,17 +46,11 @@ set_error_handler(static function (int $severity, string $message, string $file,
     return true;
 }, E_ALL);
 
-set_exception_handler(static function (\Throwable $e) use ($logError, $logFile) {
+set_exception_handler(static function (\Throwable $e) use ($logError, $logFile, $projectRoot, $renderErrorPage) {
     $logError($e);
     http_response_code(500);
     header('Content-Type: text/html; charset=utf-8');
-    $debug = (isset($_ENV['APP_DEBUG']) && $_ENV['APP_DEBUG'] === 'true') || !isset($_ENV['APP_DEBUG']);
-    if ($debug) {
-        echo '<h1>Erro 500</h1><pre>' . htmlspecialchars($e->getMessage() . "\n" . $e->getFile() . ':' . $e->getLine() . "\n" . $e->getTraceAsString()) . '</pre>';
-        echo '<p>Log gravado em: ' . htmlspecialchars($logFile) . '</p>';
-    } else {
-        echo '<h1>Erro interno do servidor</h1><p>Verifique o log em storage/logs/php_errors.log</p>';
-    }
+    $renderErrorPage(get_class($e), $e->getMessage(), $e->getFile(), $e->getLine(), $e->getTrace(), $projectRoot);
 });
 
 try {
