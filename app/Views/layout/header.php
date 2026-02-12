@@ -1,6 +1,5 @@
 <?php
-$appConfig = file_exists(dirname(__DIR__, 3) . '/config/app.php') ? require dirname(__DIR__, 3) . '/config/app.php' : [];
-$baseUrl = $appConfig['base_url'] ?? '/motos';
+$baseUrl = $baseUrl ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">

@@ -6,16 +6,15 @@ abstract class BaseController
 {
     protected function render(string $view, array $data = []): void
     {
+        $projectRoot = dirname(__DIR__, 2);
+        $configPath = $projectRoot . '/config/app.php';
+        $appConfig = file_exists($configPath) ? (require $configPath) : [];
+        $data['baseUrl'] = $appConfig['base_url'] ?? '';
+        $data['paginaAtual'] = $this->getPaginaAtual();
         extract($data);
-        
-        // Determina a página atual para destacar no menu
-        $paginaAtual = $this->getPaginaAtual();
-        $data['paginaAtual'] = $paginaAtual;
-        
-        // Inclui o header
+
         $headerPath = __DIR__ . '/../Views/layout/header.php';
         if (file_exists($headerPath)) {
-            extract($data);
             require $headerPath;
         }
         
