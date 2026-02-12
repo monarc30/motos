@@ -19,12 +19,28 @@ $logError = static function (\Throwable $e) use ($logFile) {
 };
 
 $renderErrorPage = static function (string $title, string $message, string $file, int $line, array $trace, string $projectRoot) {
-    $errorTitle = $title;
-    $errorMessage = $message;
-    $errorFile = $file;
-    $errorLine = $line;
-    $errorTrace = $trace;
-    require $projectRoot . '/app/Views/errors/debug.php';
+    $fallback = static function () use ($title, $message, $file, $line) {
+        echo '<h1>Erro 500</h1><pre>' . htmlspecialchars($title . "\n\n" . $message . "\n\n" . $file . ':' . $line) . '</pre>';
+    };
+    $viewPath = $projectRoot . '/app/Views/errors/debug.php';
+    if (!headers_sent()) {
+        header('Content-Type: text/html; charset=utf-8');
+        http_response_code(500);
+    }
+    if (is_readable($viewPath)) {
+        try {
+            $errorTitle = $title;
+            $errorMessage = $message;
+            $errorFile = $file;
+            $errorLine = $line;
+            $errorTrace = $trace;
+            require $viewPath;
+        } catch (\Throwable $e) {
+            $fallback();
+        }
+    } else {
+        $fallback();
+    }
 };
 
 $logLastError = static function () use ($logFile, $projectRoot, $renderErrorPage) {
@@ -33,8 +49,6 @@ $logLastError = static function () use ($logFile, $projectRoot, $renderErrorPage
         $line = date('Y-m-d H:i:s') . ' FATAL ' . $err['message'] . ' in ' . $err['file'] . ':' . $err['line'] . "\n";
         @file_put_contents($logFile, $line, FILE_APPEND | LOCK_EX);
         if (!headers_sent()) {
-            header('Content-Type: text/html; charset=utf-8');
-            http_response_code(500);
             $renderErrorPage('Erro fatal', $err['message'], $err['file'], $err['line'], [], $projectRoot);
         }
     }
@@ -53,8 +67,6 @@ set_error_handler(static function (int $severity, string $message, string $file,
 
 set_exception_handler(static function (\Throwable $e) use ($logError, $logFile, $projectRoot, $renderErrorPage) {
     $logError($e);
-    http_response_code(500);
-    header('Content-Type: text/html; charset=utf-8');
     $renderErrorPage(get_class($e), $e->getMessage(), $e->getFile(), $e->getLine(), $e->getTrace(), $projectRoot);
 });
 
@@ -97,6 +109,7 @@ try {
     }
 
     if (method_exists($controller, $action)) {
+        @file_put_contents($logFile, date('Y-m-d H:i:s') . " [dispatch] {$controllerName}/{$action}\n", FILE_APPEND | LOCK_EX);
         $controller->$action();
     } else {
         http_response_code(404);
