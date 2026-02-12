@@ -1,4 +1,9 @@
 <?php
+// ?debug=1 na URL mostra o erro do PHP na tela (use só para descobrir o 500; remova depois)
+if (!empty($_GET['debug']) && $_GET['debug'] === '1') {
+    ini_set('display_errors', '1');
+    error_reporting(E_ALL);
+}
 
 $projectRoot = __DIR__;
 $logDir = $projectRoot . '/storage/logs';
