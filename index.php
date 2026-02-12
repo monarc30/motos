@@ -65,8 +65,8 @@ try {
 
     $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
     $path = parse_url($requestUri, PHP_URL_PATH);
-    $basePath = trim($_ENV['APP_BASE_URL'] ?? '/motos') ?: '/motos';
-    if ($path !== '' && strpos($path, $basePath) === 0) {
+    $basePath = isset($_ENV['APP_BASE_URL']) ? trim($_ENV['APP_BASE_URL']) : '/motos';
+    if ($basePath !== '' && $path !== '' && strpos($path, $basePath) === 0) {
         $path = substr($path, strlen($basePath));
     }
     $path = trim($path, '/');
