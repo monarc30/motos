@@ -1,10 +1,10 @@
-# Se o document root for exatamente a pasta motos (URL sem /motos),
-# use: RewriteBase / e altere base_url em config/app.php para ''.
+# App na RAIZ do site (ex.: comunicado.pradomotos.com): RewriteBase /
+# App em SUBPASTA (ex.: site.com/motos): use RewriteBase /motos e APP_BASE_URL=/motos no .env
 Options -Indexes +FollowSymLinks
 RewriteEngine On
-RewriteBase /motos
+RewriteBase /
 
-# Redirecionar antigos links /motos/public/ para /motos/
+# Redirecionar antigos links /motos/public/ para /motos/ (só útil se RewriteBase for /motos)
 RewriteRule ^public/(.*)$ $1 [R=301,L]
 
 # Bloquear acesso direto a pastas e arquivos sensíveis
