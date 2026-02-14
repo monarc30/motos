@@ -33,6 +33,14 @@ composer install
 - `storage/` - Arquivos gerados (documentos, logs, cache)
 - `database/` - Migrations e seeds
 
+## Acesso local
+
+- **Com virtual host** (recomendado): configure `motos.conf` e `/etc/hosts` (127.0.0.1 motos) e acesse **http://motos** ou **http://motos.local**.
+- **Em subpasta**: coloque o projeto em `htdocs/motos` (ou equivalente), use no `.htaccess` `RewriteBase /motos`, no `.env` `APP_BASE_URL=/motos` e acesse **http://localhost/motos/**.
+- **Na raiz do localhost**: se o DocumentRoot for a pasta do projeto, use `APP_BASE_URL=` (vazio) e **http://localhost/**.
+
+Ver `INSTALACAO_APACHE.md` para detalhes do Apache.
+
 ## Desenvolvimento
 
 O sistema está sendo desenvolvido passo a passo conforme o plano de desenvolvimento.

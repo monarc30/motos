@@ -20,7 +20,6 @@ $titulo = 'Comunicado de Venda';
                 type="text" 
                 id="venda_id" 
                 name="venda_id" 
-                required 
                 placeholder="Ex: 295110"
                 style="flex: 1; padding: 0.75rem; border: 1px solid #ddd; border-radius: 4px; font-size: 1rem;"
             >
@@ -36,6 +35,11 @@ $titulo = 'Comunicado de Venda';
             <button type="button" id="btnListarVendas" style="padding: 0.5rem 1rem; background: #6b46c1; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
                 Não sabe o ID? Listar vendas do Autoconf
             </button>
+        </p>
+        <p style="margin-top: 0.75rem;">
+            <strong>Ou busque por placa (Innovart):</strong>
+            <input type="text" id="placa_busca" placeholder="Ex: ABC1D23" maxlength="8" style="margin-left: 0.5rem; padding: 0.4rem 0.6rem; border: 1px solid #ddd; border-radius: 4px; width: 8rem; text-transform: uppercase;">
+            <button type="button" id="btnBuscarPorPlaca" style="margin-left: 0.25rem; padding: 0.4rem 0.8rem; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Buscar por placa</button>
         </p>
         <div id="painelListarVendas" style="display: none; margin-top: 1rem; padding: 1rem; background: #faf5ff; border-radius: 8px; border: 1px solid #e9d8fd;">
             <label for="filtro_vendas" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Filtrar por placa, modelo ou ID (opcional):</label>
@@ -213,6 +217,55 @@ document.getElementById('btnUsarVenda').addEventListener('click', function() {
     document.getElementById('venda_id_hidden').value = id;
     document.getElementById('painelListarVendas').style.display = 'none';
     document.getElementById('btnBuscarAutoconf').click();
+});
+
+// Buscar por placa (Innovart)
+document.getElementById('btnBuscarPorPlaca').addEventListener('click', function() {
+    var placa = document.getElementById('placa_busca').value.trim().replace(/\s/g, '').toUpperCase();
+    var mensagem = document.getElementById('mensagem');
+    if (!placa) {
+        mensagem.textContent = 'Informe a placa para buscar.';
+        mensagem.style.display = 'block';
+        mensagem.style.background = '#fee';
+        mensagem.style.color = '#c33';
+        return;
+    }
+    mensagem.textContent = 'Buscando por placa (Innovart)...';
+    mensagem.style.display = 'block';
+    mensagem.style.background = '#e3f2fd';
+    mensagem.style.color = '#1976d2';
+    fetch((window.APP_BASE || '') + '/comunicado-venda/buscarPorPlaca', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'placa=' + encodeURIComponent(placa)
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.erro) {
+            mensagem.textContent = 'Erro: ' + data.erro;
+            mensagem.style.background = '#fee';
+            mensagem.style.color = '#c33';
+        } else if (data.sucesso && data.dados) {
+            var d = data.dados;
+            document.getElementById('nome_cliente').value = d.cliente.nome || '';
+            document.getElementById('cpf_cliente').value = d.cliente.cpf || '';
+            document.getElementById('modelo_moto').value = d.veiculo.modelo || '';
+            document.getElementById('placa_moto').value = d.veiculo.placa || placa;
+            if (d.venda_id) {
+                document.getElementById('venda_id').value = d.venda_id;
+                document.getElementById('venda_id_hidden').value = d.venda_id;
+            }
+            document.getElementById('placa_busca').value = '';
+            mensagem.textContent = 'Dados carregados (Innovart). Preencha a data e gere o comunicado.';
+            mensagem.style.background = '#e8f5e9';
+            mensagem.style.color = '#2e7d32';
+        }
+    })
+    .catch(function(err) {
+        mensagem.textContent = 'Erro ao buscar por placa: ' + err.message;
+        mensagem.style.background = '#fee';
+        mensagem.style.color = '#c33';
+    });
 });
 
 // Submissão do formulário

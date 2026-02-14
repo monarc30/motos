@@ -70,6 +70,51 @@ class IntencaoVendaController extends BaseController
         }
     }
 
+    /**
+     * Busca dados por placa via webhook Innovart (veículo + comprador).
+     * POST: placa=XXX
+     */
+    public function buscarPorPlaca(): void
+    {
+        $placa = trim($_POST['placa'] ?? $_GET['placa'] ?? '');
+        if ($placa === '') {
+            $this->json(['erro' => 'Placa não informada.'], 400);
+            return;
+        }
+
+        $config = require dirname(__DIR__, 2) . '/config/innovart.php';
+        if (empty($config['enabled'])) {
+            $this->json(['erro' => 'Busca por placa (Innovart) não está configurada. Configure INNOVART_USER e INNOVART_PASSWORD no .env.'], 503);
+            return;
+        }
+
+        try {
+            $client = new \App\Models\Innovart\InnovartClient();
+            $dados = $client->getPorPlaca($placa);
+
+            $this->json([
+                'sucesso' => true,
+                'dados' => [
+                    'cliente' => [
+                        'nome' => $dados['cliente']['nome'] ?? '',
+                        'cpf' => $dados['cliente']['cpf'] ?? '',
+                        'telefone' => $dados['cliente']['telefone'] ?? '',
+                        'whatsapp' => $dados['cliente']['whatsapp'] ?? '',
+                        'endereco' => $dados['cliente']['endereco'] ?? '',
+                    ],
+                    'veiculo' => [
+                        'modelo' => $dados['veiculo']['modelo'] ?? '',
+                        'placa' => $dados['veiculo']['placa'] ?? $placa,
+                        'ano' => $dados['veiculo']['ano'] ?? null,
+                    ],
+                    'venda_id' => $dados['venda_id'] ?? '',
+                ],
+            ]);
+        } catch (\Exception $e) {
+            $this->json(['erro' => $e->getMessage()], 500);
+        }
+    }
+
     public function gerar(): void
     {
         try {
