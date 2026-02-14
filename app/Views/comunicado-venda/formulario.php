@@ -37,7 +37,7 @@ $titulo = 'Comunicado de Venda';
             </button>
         </p>
         <p style="margin-top: 0.75rem;">
-            <strong>Ou busque por placa (Innovart):</strong>
+            <strong>Ou busque por placa:</strong>
             <input type="text" id="placa_busca" placeholder="Ex: ABC1D23" maxlength="8" style="margin-left: 0.5rem; padding: 0.4rem 0.6rem; border: 1px solid #ddd; border-radius: 4px; width: 8rem; text-transform: uppercase;">
             <button type="button" id="btnBuscarPorPlaca" style="margin-left: 0.25rem; padding: 0.4rem 0.8rem; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Buscar por placa</button>
         </p>
